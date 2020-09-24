@@ -49,7 +49,7 @@ class BasicBlock(nn.Module):
 class Bottleneck(nn.Module):
     expansion = 4
 
-    def __init__(self, inplanes, planes, stride, downsample=False):
+    def __init__(self, inplanes, planes, stride=1, downsample=False):
         super(Bottleneck, self).__init__()
         self.downsample = downsample
         self.stride = stride
@@ -60,7 +60,7 @@ class Bottleneck(nn.Module):
         self.conv2 = nn.Conv2d(planes, planes, kernel_size=3, stride=stride, padding=1, bias=False)
         self.bn2 = nn.BatchNorm2d(planes)
 
-        self.conv3 = nn.Conv2d(planes, planes*4， kernel_size=1, bias=False)
+        self.conv3 = nn.Conv2d(planes, planes*4, kernel_size=1, bias=False)
         self.bn3 = nn.BatchNorm2d(planes * 4)
         self.relu = nn.ReLU(inplace=True)
     
@@ -98,7 +98,7 @@ class ResNet(nn.Module):
         self.relu = nn.ReLU(inplace=True)
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
 
-        self.layer1 = self._make_layer(block, 64,   layers[0], stride=1)
+        self.layer1 = self._make_layer(block, 64,   layers[0])
         self.layer2 = self._make_layer(block, 128,  layers[1], stride=2)
         self.layer3 = self._make_layer(block, 256,  layers[2], stride=2)
         self.layer4 = self._make_layer(block, 512,  layers[3], stride=2)
@@ -108,7 +108,7 @@ class ResNet(nn.Module):
 
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
-                n = m.kernel_size[0] * m.kernel_size[1] * m.out_chennels
+                n = m.kernel_size[0] * m.kernel_size[1] * m.out_channels
                 m.weight.data.normal_(0, math.sqrt(2.0/n))
             elif isinstance(m, nn.BatchNorm2d):
                 m.weight.data.fill_(1)
@@ -124,10 +124,10 @@ class ResNet(nn.Module):
             )
         
         layers = []
-        layer.append(block(self.inplanes, planes, stride, downsample))
+        layers.append(block(self.inplanes, planes, stride, downsample))
         self.inplanes = planes * block.expansion
-        for i in range(1, bnlocks):
-            layers.append(block(self,inplanes, planes))
+        for i in range(1, blocks):
+            layers.append(block(self.inplanes, planes))
 
         return nn.Sequential(*layers)
     
@@ -167,7 +167,7 @@ def resnet35(pretrained=False, **kwargs):
 def resnet50(pretrained=False, **kwargs):
     model = ResNet(Bottleneck, [3,4,6,3], **kwargs)
     if pretrained:
-        model.load_state_dict(model.zoo.load_url(model_urls["resnet50"]))
+        model.load_state_dict(model_zoo.load_url(model_urls["resnet50"]))
     return model
 
 def resnet101(pretrained=False, **kwargs):

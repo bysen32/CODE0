@@ -1,7 +1,7 @@
 from torch import nn
 import torch
 import torch.nn.functional as F
-from troch.autograd import Variable
+from torch.autograd import Variable
 from core import resnet
 import numpy as np
 

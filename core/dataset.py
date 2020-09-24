@@ -5,7 +5,6 @@ from PIL import Image
 from torchvision import transforms
 from config import INPUT_SIZE
 
-
 class CUB:
     def __init__(self, root, is_train=True, data_len=None):
         self.root = root
@@ -69,14 +68,23 @@ class CUB:
 
 
 if __name__ == "__main__":
-    dataset = CUB(root="./CUB_200_2011")
-    print(len(dataset.train_img))
-    print(len(dataset.train_label))
-    for data in dataset:
+    import torch
+    INPUT_SIZE = (448, 448)
+
+    trainset = CUB(root="./CUB_200_2011", is_train=True)
+    print(len(trainset.train_img))
+    print(len(trainset.train_label))
+    for data in trainset:
         print(data[0].size(), data[1])
 
-    dataset = CUB(root="./CUB_200_2011", is_train=False)
-    print(len(dataset.test_img))
-    print(len(dataset.test_label))
-    for data in dataset:
-        print(data[0].size(), data[1])
+    trainloader = torch.utils.data.DataLoader(trainset, batch_size=4, shuffle=True, num_workers=4, drop_last=False)
+    for i, data in enumerate(trainloader):
+        img, label= data[0].cuda(), data[1].cuda()
+        print(i, label)
+
+
+    # dataset = CUB(root="./CUB_200_2011", is_train=False)
+    # print(len(dataset.test_img))
+    # print(len(dataset.test_label))
+    # for data in dataset:
+    #    print(data[0].size(), data[1])
